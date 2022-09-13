@@ -38,11 +38,12 @@ func newContext(w http.ResponseWriter, req *http.Request) *Context {
 	}
 }
 
-// Next 中间件调用时，控制权交给下一个中间件，直到调用到最后一个中间件，然后在从后往前，调用每个中间件在Next方法之后定义的部分
+// Next 中间件调权用时，控制交给下一个中间件（调用下一个handler），直到调用到最后一个中间件
+// 然后在从后往前，调用每个中间件在Next方法之后定义的部分
 func (ctx *Context) Next() {
 	ctx.index++
 	s := len(ctx.handlers)
-	for ; ctx.index < s; ctx.index++ {
+	if ctx.index < s {
 		ctx.handlers[ctx.index](ctx)
 	}
 }
@@ -102,10 +103,10 @@ func (ctx *Context) WriteBytes(code int, data []byte) {
 	}
 }
 
-func (ctx *Context) WriteHTML(code int, name string, data interface{}) {
+func (ctx *Context) WriteHTML(code int, fileName string, data interface{}) {
 	ctx.SetHeader("Content-Type", "text/html")
 	ctx.SetStatus(code)
-	if err := ctx.engine.htmlTemplates.ExecuteTemplate(ctx.Writer, name, data); err != nil {
+	if err := ctx.engine.htmlTemplates.ExecuteTemplate(ctx.Writer, fileName, data); err != nil {
 		ctx.ReturnFail(500, err.Error())
 	}
 }

@@ -12,16 +12,16 @@ type HandlerFunc func(*Context)
 
 // RouterGroup 当前路径所包含结构的组
 type RouterGroup struct {
-	prefix      string        //前缀
-	middlewares []HandlerFunc //中间件
-	parent      *RouterGroup  //父分组
-	engine      *Engine       //所有分组共享一个Engine实例
+	prefix      string        // 前缀
+	middlewares []HandlerFunc // 中间件
+	parent      *RouterGroup  // 父分组
+	engine      *Engine       // 所有分组共享一个Engine实例
 }
 
 type Engine struct {
 	*RouterGroup
-	router        *router
-	groups        []*RouterGroup     //拥有所有RouterGroup
+	router        *router            // 全局路由
+	groups        []*RouterGroup     // 全局RouterGroup
 	htmlTemplates *template.Template //html 渲染，将所有的模板加载进内存
 	funcMap       template.FuncMap   //html 渲染，所有自定义模板渲染函数
 }
@@ -106,7 +106,8 @@ func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	ctx := newContext(w, req)
 	ctx.handlers = middlewares
 	ctx.engine = engine
-	engine.router.handle(ctx)
+	engine.router.addHandleByPath(ctx)
+	ctx.Next()
 }
 
 // Group 创建一个新的子路由分组，属于同个族系的分组共享一个engine实例

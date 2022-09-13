@@ -10,7 +10,6 @@ import (
 func main() {
 
 	r := gee.Default()
-	r.Use(gee.Logger(), gee.Recovery())
 
 	//r := gee.New()
 	//r.Use(gee.Logger())
@@ -40,7 +39,7 @@ func main() {
 	})
 
 	r.GET("/", func(c *gee.Context) {
-		c.WriteString(http.StatusOK, "Hello Yu\n")
+		c.WriteString(http.StatusOK, "Hello Yu\nTo feel!\nTo listen your heart\nTo say\n")
 	})
 
 	r.GET("/panic", func(c *gee.Context) {

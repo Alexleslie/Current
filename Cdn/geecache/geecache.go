@@ -89,9 +89,22 @@ func (g *Group) Get(key string) (ByteView, error) {
 		log.Printf("[GeeCache] hit")
 		return v, nil
 	}
-
 	// 从分布式缓存服务器中寻找缓存
 	return g.loadFromAllPeers(key)
+}
+
+func (g *Group) GetKeyAtCacheServer(key string) (ByteView, error) {
+	if key == "" {
+		return ByteView{}, fmt.Errorf("key is required")
+	}
+
+	if v, ok := g.mainCache.get(key); ok {
+		log.Printf("[GeeCache] hit")
+		return v, nil
+	}
+	// 从本地中寻找缓存
+	log.Printf("[GetKeyAtCacheServer] Call loadAndStoreLocally for key=[%+v]", key)
+	return g.loadAndStoreLocally(key)
 }
 
 func (g *Group) loadFromAllPeers(key string) (value ByteView, err error) {
@@ -102,15 +115,16 @@ func (g *Group) loadFromAllPeers(key string) (value ByteView, err error) {
 			// 使用PickPeer()方法调用getFromPeer()从远程获取节点
 			// 若是本机节点或失败，则调用getLocally()。
 			if peer, ok := g.peers.PickPeer(key); ok {
-				log.Printf("[load] PickPeer success, peer=[%+v]\n", peer)
-				if value, err = g.getFromPeer(peer, key); err == nil {
+				log.Printf("[loadFromAllPeers] PickPeer success, peer=[%+v]\n", peer)
+				if value, err = g.getFromPeer(peer, key); err == nil && value.Len() > 0 {
+					log.Printf("[loadFromAllPeers] Call getFromPeer success, value=[%+v]", value)
 					return value, nil
 				}
-				log.Println("[GeeCache] Failed to get from peer", err)
+				log.Println("[loadFromAllPeers] Failed to get from peer", err)
 			}
 		}
 		// 回调函数，单机获取源数据
-		return g.getAndStoreLocally(key)
+		return g.loadAndStoreLocally(key)
 	})
 	if err != nil {
 		return ByteView{}, err
@@ -133,7 +147,7 @@ func (g *Group) getFromPeer(peer PeerGetter, key string) (ByteView, error) {
 }
 
 // getLocally调用用户回调函数g.getter.Get()获取源数据，并且将源数据添加到缓存mainCache中（通过populateCache方法）
-func (g *Group) getAndStoreLocally(key string) (ByteView, error) {
+func (g *Group) loadAndStoreLocally(key string) (ByteView, error) {
 	bytes, err := g.getter.Get(key)
 	if err != nil {
 		return ByteView{}, err

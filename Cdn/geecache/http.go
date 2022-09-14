@@ -117,11 +117,14 @@ func StartCacheServer(peerAttrs []string, basePath string) {
 	cacheServer := gee.Default()
 	cacheServer.GET(basePath, GetValueAtCacheServer)
 	for _, attr := range peerAttrs {
-		cacheServer.Run(attr)
+		go cacheServer.Run(attr)
 	}
 }
 
 func parseCachePath(path string) []string {
+	if path[0] == '/' {
+		path = path[1:]
+	}
 	parts := strings.SplitN(path, "/", 3)
 	if len(parts) != 3 {
 		return nil
@@ -129,7 +132,7 @@ func parseCachePath(path string) []string {
 	return parts
 }
 
-// GetValueAtCacheServer 处理其他机器的http请求（找缓存值）
+// GetValueAtCacheServer 处理主节点机器的http请求（找缓存值）
 // 解析http请求得到缓存key
 // 从group里找缓存key
 func GetValueAtCacheServer(ctx *gee.Context) {
@@ -138,7 +141,6 @@ func GetValueAtCacheServer(ctx *gee.Context) {
 		ctx.ReturnFail(http.StatusInternalServerError, "bad request")
 		return
 	}
-
 	groupName, key := parts[1], parts[2]
 	group := GetGroup(groupName)
 	if group == nil {
@@ -147,7 +149,7 @@ func GetValueAtCacheServer(ctx *gee.Context) {
 	}
 
 	//通过group.Get(key)获取访问数据
-	view, err := group.Get(key)
+	view, err := group.GetKeyAtCacheServer(key)
 	body, err := proto.Marshal(&pb.Response{Value: view.ByteSlice()})
 	if err != nil {
 		ctx.ReturnFail(http.StatusInternalServerError, err.Error())

@@ -37,6 +37,10 @@ func getKeyInApi(ctx *gee.Context) {
 
 func main() {
 	var basePath string
+	var isApi bool
+	var isCache bool
+	isApi = false
+	isCache = true
 
 	basePath = utils.DefaultBasePath
 
@@ -54,13 +58,20 @@ func main() {
 		addrsForListen = append(addrsForListen, v[7:])
 	}
 
-	geecache.StartCacheServer(addrsForListen, basePath)
-
-	apiServer := gee.Default()
 	ApiServerGroup = geecache.NewGroup("scores", 2<<10, geecache.GetterFunc(getFromDb))
-	ApiServerGroup.RegisterPeers(geecache.NewApiServerCachePeers(apiAddr, addrs, basePath))
 
-	apiServer.GET("/api", getKeyInApi)
-	apiServer.Run(apiAddr[7:])
+	if isCache {
+		geecache.StartCacheServer(addrsForListen, basePath+"/*")
+		http.ListenAndServe(":8888", nil)
+	}
+
+	if isApi {
+		ApiServerGroup.RegisterPeers(geecache.NewApiServerCachePeers(apiAddr, addrs, basePath))
+		apiServer := gee.Default()
+		apiServer.GET("/api", getKeyInApi)
+		if err := apiServer.Run(apiAddr[7:]); err != nil {
+			fmt.Println(err)
+		}
+	}
 
 }

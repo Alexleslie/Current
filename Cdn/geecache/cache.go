@@ -3,7 +3,7 @@ package geecache
 /*并发控制。实例化lru，封装get和add方法，并添加互斥锁*/
 
 import (
-	"cdn/geecache/lru"
+	"Current/Cdn/geecache/lru"
 	"sync"
 )
 

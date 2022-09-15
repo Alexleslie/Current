@@ -32,36 +32,23 @@ func getKeyInApi(ctx *gee.Context) {
 		ctx.ReturnFail(http.StatusInternalServerError, err.Error())
 	}
 	ctx.WriteBytes(http.StatusOK, view.ByteSlice())
-
 }
 
 func main() {
 	var basePath string
 	var isApi bool
 	var isCache bool
-	isApi = false
-	isCache = true
+	isApi = true
+	isCache = false
 
 	basePath = utils.DefaultBasePath
 
 	apiAddr := "http://localhost:9999"
-	addrMap := map[int]string{
-		8001: "http://localhost:8001",
-		8002: "http://localhost:8002",
-		8003: "http://localhost:8003",
-	}
-
-	var addrs []string
-	var addrsForListen []string
-	for _, v := range addrMap {
-		addrs = append(addrs, v)
-		addrsForListen = append(addrsForListen, v[7:])
-	}
-
+	addrs := []string{"http://localhost:8001", "http://localhost:8002", "http://localhost:8003"}
 	ApiServerGroup = geecache.NewGroup("scores", 2<<10, geecache.GetterFunc(getFromDb))
 
 	if isCache {
-		geecache.StartCacheServer(addrsForListen, basePath+"/*")
+		geecache.StartCacheServer(addrs, basePath+"/*")
 		http.ListenAndServe(":8888", nil)
 	}
 
@@ -73,5 +60,4 @@ func main() {
 			fmt.Println(err)
 		}
 	}
-
 }

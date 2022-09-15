@@ -75,7 +75,6 @@ func (h *httpGetter) GetValueFromRemotePeer(in *pb.Request, out *pb.Response) er
 	if err = proto.Unmarshal(bytes, out); err != nil {
 		return fmt.Errorf("decoding response body:%v", err)
 	}
-
 	return nil
 }
 
@@ -117,7 +116,8 @@ func StartCacheServer(peerAttrs []string, basePath string) {
 	cacheServer := gee.Default()
 	cacheServer.GET(basePath, GetValueAtCacheServer)
 	for _, attr := range peerAttrs {
-		go cacheServer.Run(attr)
+		u, _ := url.Parse(attr)
+		go cacheServer.Run(u.Host)
 	}
 }
 
@@ -155,6 +155,5 @@ func GetValueAtCacheServer(ctx *gee.Context) {
 		ctx.ReturnFail(http.StatusInternalServerError, err.Error())
 		return
 	}
-
 	ctx.WriteBytes(http.StatusOK, body)
 }

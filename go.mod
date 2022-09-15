@@ -1,4 +1,4 @@
-module cdn
+module Current
 
 go 1.19
 

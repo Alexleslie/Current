@@ -47,8 +47,8 @@ func New(replicas int, fn Hash) *Map {
 	return m
 }
 
-// Add 添加真实节点/机器的方法
-func (m *Map) Add(keys ...string) {
+// AddPhysicalAndVirtualPeer 添加真实节点/虚拟节点的方法
+func (m *Map) AddPhysicalAndVirtualPeer(keys ...string) {
 	for _, key := range keys {
 		for i := 0; i < m.replicas; i++ { //对每一个真实节点，对应创建m.replicas个虚拟节点
 			hash := int(m.hash([]byte(strconv.Itoa(i) + key))) //虚拟节点的名称为strconv.Itoa(i) + key,即添加编号区分虚拟节点
@@ -59,8 +59,8 @@ func (m *Map) Add(keys ...string) {
 	sort.Ints(m.keys) //哈希环上的哈希值排序
 }
 
-// Get 选择节点的方法
-func (m *Map) Get(key string) string {
+// GetRealPeerFromKey 根据包含虚拟节点的hash key，返回对应的真实节点
+func (m *Map) GetRealPeerFromKey(key string) string {
 	if len(m.keys) == 0 {
 		return ""
 	}
@@ -73,7 +73,7 @@ func (m *Map) Get(key string) string {
 		return m.keys[i] >= hash
 	})
 
-	//如果 idx == len(m.keys)，说明应选择 m.keys[0]，因为 m.keys 是一个环状结构，所以用取余数的方式来处理这种情况。
+	// 如果 idx == len(m.keys)，说明应选择 m.keys[0]，因为 m.keys 是一个环状结构，所以用取余数的方式来处理这种情况。
 	return m.hashMap[m.keys[idx%len(m.keys)]] //hashMap映射得到真实节点
 
 }

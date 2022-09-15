@@ -1,6 +1,6 @@
 package geecache
 
-import pb "cdn/geecache/geecachepb"
+import pb "Current/Cdn/geecache/geecachepb"
 
 /*
 原流程
@@ -25,5 +25,5 @@ type PeerPicker interface {
 
 // PeerGetter 客户端获取缓存信息
 type PeerGetter interface {
-	Get(in *pb.Request, out *pb.Response) error //从对应group查找缓存值（PeerGetter对应与上述流程的HTTP客户端）
+	GetValueFromRemotePeer(in *pb.Request, out *pb.Response) error //从对应group查找缓存值（PeerGetter对应与上述流程的HTTP客户端）
 }

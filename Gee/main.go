@@ -1,7 +1,7 @@
 package main
 
 import (
-	"gee/gee"
+	"Current/Gee/gee"
 	"time"
 
 	"net/http"
@@ -11,8 +11,8 @@ func main() {
 
 	r := gee.Default()
 
-	//r := gee.New()
-	//r.Use(gee.Logger())
+	//r := Gee.New()
+	//r.Use(Gee.Logger())
 	//r.SetFuncMap(template.FuncMap{
 	//	"FormatAsDate": FormatAsDate,
 	//})
@@ -21,11 +21,11 @@ func main() {
 	//
 	//stu1 := &student{Name: "Yu", Age: 18}
 	//stu2 := &student{Name: "Geektutu", Age: 20}
-	//r.GET("/", func(c *gee.Context) {
+	//r.GET("/", func(c *Gee.Context) {
 	//	c.HTML(http.StatusOK, "css.tmpl", nil)
 	//})
-	//r.GET("/students", func(c *gee.Context) {
-	//	c.HTML(http.StatusOK, "arr.tmpl", gee.H{
+	//r.GET("/students", func(c *Gee.Context) {
+	//	c.HTML(http.StatusOK, "arr.tmpl", Gee.H{
 	//		"title":  "yu",
 	//		"stuARR": [2]*student{stu1, stu2},
 	//	})

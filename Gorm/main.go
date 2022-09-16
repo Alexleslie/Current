@@ -1,26 +1,33 @@
 package main
 
 import (
-	"database/sql"
+	"Current/Gorm/geeORM"
+	"Current/tools/logc"
 	_ "github.com/mattn/go-sqlite3"
-	"log"
 )
 
+type Student struct {
+	Name string
+	Age  int
+}
+
+type Teacher struct {
+	Name  string
+	Age   int
+	Level int
+}
+
 func main() {
-	db, _ := sql.Open("sqlite3", "gee.db")
-	log.Println(db)
-	defer func() { _ = db.Close() }()
-	_, _ = db.Exec("DROP TABLE IF EXISTS USER;")
-	_, _ = db.Exec("CREATE TABLE User(Name text);")
-	result, err := db.Exec("INSERT INTO User('Name') values (?),(?)", "Tom", "Sam") // ?为占位符，一般用来防SQL注入
-	if err == nil {
-		affected, _ := result.RowsAffected()
-		log.Println(affected)
+	engine, err := geeORM.NewEngine("sqlite3", "gee.db")
+	if err != nil {
+		logc.Error("err=[%+v]", err)
 	}
-	row := db.QueryRow("SELECT Name FROM User LIMIT 1") // 只返回一条查询记录，类型是 *sql.Row，Query()返回多条查询记录
-	var name string
-	if err := row.Scan(&name); err == nil {
-		log.Println(name)
-	}
+	session := engine.NewSession()
+	session.SetSchemaByInstance(&Teacher{}).CreateTable()
+	session.Insert(&Teacher{"Yu", 18, 1})
+	var teacher []Teacher
+	session.Limit(1).Where("Level", 2).FindAll(&teacher)
+	logc.Info("[%+v]", teacher)
+	session.DropTable()
 
 }

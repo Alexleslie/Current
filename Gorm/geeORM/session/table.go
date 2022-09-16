@@ -2,14 +2,14 @@ package session
 
 import (
 	"Current/Gorm/geeORM/schema"
+	"Current/tools/logc"
 	"fmt"
-	"github.com/golang/glog"
 	"reflect"
 	"strings"
 )
 
 // SetSchemaByInstance 给schema——数据库表格赋值，解析操作比较耗时，将解析结果保存到成员变量schema
-// 即使schema被调用多次，如果传入结构体名称不发生辩护啊，则不会更新schema的值
+// 即使schema被调用多次，如果传入结构体名称不发生变化，则不会更新schema的值
 func (s *Session) SetSchemaByInstance(instance interface{}) *Session {
 	// nil or different model,update schema
 	if s.schema == nil || reflect.TypeOf(instance) != reflect.TypeOf(s.schema.Model) {
@@ -20,7 +20,7 @@ func (s *Session) SetSchemaByInstance(instance interface{}) *Session {
 
 func (s *Session) GetSchema() *schema.Schema {
 	if s.schema == nil {
-		glog.Error("[Session.GetSchema] Schema is nil")
+		logc.Error("[Session.GetSchema] Schema is nil")
 	}
 	return s.schema
 }

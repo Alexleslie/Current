@@ -3,9 +3,9 @@ package geeORM
 import (
 	"Current/Gorm/geeORM/dialect"
 	"Current/Gorm/geeORM/session"
+	"Current/tools/logc"
 	"database/sql"
 	"fmt"
-	"github.com/golang/glog"
 	"strings"
 )
 
@@ -50,29 +50,28 @@ func (engine *Engine) Transaction(f TxFunc) (result interface{}, err error) {
 func NewEngine(driver, source string) (e *Engine, err error) {
 	db, err := sql.Open(driver, source)
 	if err != nil {
-		glog.Error(err)
+		logc.Error("[NewEngine] Open sql error, err=[%+v]", err)
 		return
 	}
 	//Sent a ping to make sure the databases connection is alive.
 	if err = db.Ping(); err != nil {
-		glog.Error(err)
+		logc.Error("[NewEngine] Ping sql error, err=[%+v]", err)
 		return
 	}
 	//make sure the specific dialect exists
 	dial, ok := dialect.GetDialect(driver)
 	if !ok {
-		glog.Errorf("[NewEngine] Dialect %s Not Found", driver)
+		logc.Error("[NewEngine] Dialect is not found, err=[%+v]", err)
 	}
 	e = &Engine{db: db, dialect: dial}
-	glog.Info("[NewEngine] Connect database success")
 	return
 }
 
 func (engine *Engine) Close() {
 	if err := engine.db.Close(); err != nil {
-		glog.Error("Failed to close database")
+		logc.Error("[Engine.Close] Failed to close database")
 	}
-	glog.Info("Close database success")
+	logc.Info("[Engine.Close] Close database success")
 }
 
 // NewSession 通过Engine实例创建会话，与数据库进行交互
@@ -99,7 +98,7 @@ func difference(a []string, b []string) (diff []string) {
 func (engine *Engine) Migrate(value interface{}) error {
 	_, err := engine.Transaction(func(s *session.Session) (result interface{}, err error) {
 		if !s.SetSchemaByInstance(value).HasTable() {
-			glog.Info("[engine.Migrate] Table %s doesn't exist", s.GetSchema().Name)
+			logc.Info("[Engine.Migrate] Table %v doesn't exist", s.GetSchema().Name)
 			return nil, s.CreateTable()
 		}
 		table := s.GetSchema()
@@ -108,7 +107,7 @@ func (engine *Engine) Migrate(value interface{}) error {
 		//计算新增和删除字段
 		addCols := difference(table.FieldNames, columns)
 		delCols := difference(columns, table.FieldNames)
-		glog.Infof("[engine.Migrate] added cols %v,deleted cols %v", addCols, delCols)
+		logc.Info("[Engine.Migrate] added cols %v,deleted cols %v", addCols, delCols)
 
 		for _, col := range addCols {
 			f := table.GetField(col)

@@ -4,8 +4,8 @@ import (
 	"Current/Gorm/geeORM/clause"
 	"Current/Gorm/geeORM/dialect"
 	"Current/Gorm/geeORM/schema"
+	"Current/tools/logc"
 	"database/sql"
-	"github.com/golang/glog"
 	"strings"
 )
 
@@ -65,9 +65,9 @@ func (s *Session) Raw(sql string, values ...interface{}) *Session {
 // Exec raw sql with sqlVars
 func (s *Session) Exec() (result sql.Result, err error) {
 	defer s.ClearSession()
-	glog.Info(s.sql.String(), s.sqlVars)
+	logc.Info("[Session.Exec] sql=[%+v], sqlVars=[%+v]", s.sql.String(), s.sqlVars)
 	if result, err = s.DB().Exec(s.sql.String(), s.sqlVars...); err != nil {
-		glog.Error(err)
+		logc.Error("[Session.Exec] Exec sql error, sql=[%+v], sqlVars=[%+v], err=[%+v]", s.sql.String(), s.sqlVars, err)
 	}
 	return
 }
@@ -75,16 +75,16 @@ func (s *Session) Exec() (result sql.Result, err error) {
 // QueryRaw gets a record form db
 func (s *Session) QueryRaw() *sql.Row {
 	defer s.ClearSession()
-	glog.Info(s.sql.String(), s.sqlVars)
+	logc.Info("[Session.QueryRaw] sql=[%+v], sqlVars=[%+v]", s.sql.String(), s.sqlVars)
 	return s.DB().QueryRow(s.sql.String(), s.sqlVars...)
 }
 
 // QueryRaws gets a list of records from db
 func (s *Session) QueryRaws() (rows *sql.Rows, err error) {
 	defer s.ClearSession()
-	glog.Info(s.sql.String(), s.sqlVars)
+	logc.Info("[Session.QueryRaws] sql=[%+v], sqlVars=[%+v]", s.sql.String(), s.sqlVars)
 	if rows, err = s.DB().Query(s.sql.String(), s.sqlVars...); err != nil {
-		glog.Error(err)
+		logc.Error("[Session.QueryRaws] Query error, err=[%+v]", err)
 	}
 	return
 }

@@ -16,7 +16,7 @@ func (s *Session) Insert(instances ...interface{}) (int64, error) {
 		s.CallMethod(BeforeInsert, instance)
 		table := s.SetSchemaByInstance(instance).GetSchema()
 		s.clause.SetSqlAndVars(clause.INSERT, table.Name, table.FieldNames) //构造SQL插入子句
-		recordInstances = append(recordInstances, table.RecordObjectValues(instance))
+		recordInstances = append(recordInstances, table.RecordObjectValues(instance)...)
 	}
 
 	s.clause.SetSqlAndVars(clause.VALUES, recordInstances)           // 构造SQL插入值的子句
@@ -116,9 +116,9 @@ func (s *Session) Limit(num int) *Session {
 }
 
 // Where adds limit condition to clause
-func (s *Session) Where(desc string, args ...interface{}) *Session {
+func (s *Session) Where(field string, args ...interface{}) *Session {
 	var vars []interface{}
-	s.clause.SetSqlAndVars(clause.WHERE, append(append(vars, desc), args...)...)
+	s.clause.SetSqlAndVars(clause.WHERE, append(append(vars, field), args...)...)
 	return s
 }
 

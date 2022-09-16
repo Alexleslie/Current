@@ -86,7 +86,7 @@ func _limit(values ...interface{}) (string, []interface{}) {
 func _where(values ...interface{}) (string, []interface{}) {
 	//WHERE $desc
 	desc, vars := values[0], values[1:]
-	return fmt.Sprintf("WHERE %s", desc), vars
+	return fmt.Sprintf("WHERE %s = ?", desc), vars
 }
 
 func _orderBy(values ...interface{}) (string, []interface{}) {

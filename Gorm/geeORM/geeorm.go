@@ -64,7 +64,6 @@ func NewEngine(driver, source string) (e *Engine, err error) {
 		logc.Error("[NewEngine] Dialect is not found, err=[%+v]", err)
 	}
 	e = &Engine{db: db, dialect: dial}
-	logc.Info("[NewEngine] Connect database success, engine=[%+v]", e)
 	return
 }
 

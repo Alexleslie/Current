@@ -47,7 +47,8 @@ func ParseStructInstanceToSchema(dest interface{}, d dialect.Dialect) *Schema {
 
 	// NumField()获取实例字段的个数
 	for i := 0; i < modelType.NumField(); i++ {
-		p := modelType.Field(i)                     // 获取特定字段
+		p := modelType.Field(i)
+		// 获取特定字段
 		if !p.Anonymous && ast.IsExported(p.Name) { // 是否是嵌入字段&&是否是大写字母开头
 			filed := &Field{
 				Name: p.Name,                                              // 字段名

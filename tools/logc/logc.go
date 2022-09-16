@@ -26,22 +26,26 @@ var (
 )
 
 func toFileAndStd(logger *log.Logger, format string, values ...interface{}) {
-	logger.Output(3, fmt.Sprintf(format, values))
-	stdLogger.Output(3, fmt.Sprintf(format, values))
+	if len(values) > 0 {
+		format = fmt.Sprintf(format, values...)
+	}
+	logger.Output(3, format)
+	stdLogger.SetPrefix(logger.Prefix())
+	stdLogger.Output(3, format)
 }
 
 func Info(format string, values ...interface{}) {
-	toFileAndStd(infoLogger, format, values)
+	toFileAndStd(infoLogger, format, values...)
 }
 
 func Debug(format string, values ...interface{}) {
-	toFileAndStd(debugLogger, format, values)
+	toFileAndStd(debugLogger, format, values...)
 }
 func Warn(format string, values ...interface{}) {
-	toFileAndStd(warnLogger, format, values)
+	toFileAndStd(warnLogger, format, values...)
 }
 func Error(format string, values ...interface{}) {
-	toFileAndStd(errorLogger, format, values)
+	toFileAndStd(errorLogger, format, values...)
 }
 
 func SetOutPutPath(logFile io.Writer) {

@@ -1,7 +1,7 @@
 package session
 
 import (
-	"github.com/golang/glog"
+	"Current/tools/logc"
 	"reflect"
 )
 
@@ -28,7 +28,7 @@ func (s *Session) CallMethod(method string, value interface{}) {
 	if fm.IsValid() {
 		if v := fm.Call(param); len(v) > 0 {
 			if err, ok := v[0].Interface().(error); ok {
-				glog.Error(err)
+				logc.Error("[Session.CallMethod], err=[%+v]", err)
 			}
 		}
 	}

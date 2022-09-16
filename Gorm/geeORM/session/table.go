@@ -2,8 +2,8 @@ package session
 
 import (
 	"Current/Gorm/geeORM/schema"
+	"Current/tools/logc"
 	"fmt"
-	"github.com/golang/glog"
 	"reflect"
 	"strings"
 )
@@ -20,7 +20,7 @@ func (s *Session) SetSchemaByInstance(instance interface{}) *Session {
 
 func (s *Session) GetSchema() *schema.Schema {
 	if s.schema == nil {
-		glog.Error("[Session.GetSchema] Schema is nil")
+		logc.Error("[Session.GetSchema] Schema is nil")
 	}
 	return s.schema
 }

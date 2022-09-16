@@ -2,7 +2,7 @@ package schema
 
 import (
 	"Current/Gorm/geeORM/dialect"
-	"github.com/golang/glog"
+	"Current/tools/logc"
 	"go/ast"
 	"reflect"
 )
@@ -71,6 +71,6 @@ func (schema *Schema) RecordObjectValues(dest interface{}) []interface{} {
 	for _, field := range schema.Fields {
 		fieldValues = append(fieldValues, destValue.FieldByName(field.Name).Interface())
 	}
-	glog.Infof("[Schema.RecordObjectValues] Object=[%+v],fieldValues=[%+v]", dest, fieldValues)
+	logc.Info("[Schema.RecordObjectValues] Object=[%+v],fieldValues=[%+v]", dest, fieldValues)
 	return fieldValues
 }

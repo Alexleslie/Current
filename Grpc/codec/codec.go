@@ -1,7 +1,6 @@
 package codec
 
 import (
-	"Current/Grpc/utils"
 	"io"
 )
 
@@ -32,5 +31,5 @@ var TypeToCodeCMap map[EncodeType]FuncGetter
 
 func init() {
 	TypeToCodeCMap = make(map[EncodeType]FuncGetter)
-	TypeToCodeCMap[utils.GobType] = NewGobCodeC
+	TypeToCodeCMap[GobType] = NewGobCodeC
 }

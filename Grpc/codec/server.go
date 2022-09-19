@@ -1,11 +1,11 @@
 package codec
 
 import (
-	"Current/Grpc/utils"
 	"Current/tools/logc"
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"reflect"
 	"sync"
@@ -17,8 +17,8 @@ type Option struct {
 }
 
 var DefaultGobOption = &Option{
-	utils.MagicNumber,
-	utils.GobType,
+	MagicNumber,
+	GobType,
 }
 
 var DefaultServer = NewServer()
@@ -38,6 +38,10 @@ func NewServer() *Server {
 	return &Server{}
 }
 
+func Accept(listen net.Listener) {
+	_ = DefaultServer.Accept(listen)
+}
+
 func (server *Server) Accept(listen net.Listener) error {
 	for {
 		conn, err := listen.Accept()
@@ -45,8 +49,8 @@ func (server *Server) Accept(listen net.Listener) error {
 			logc.Error("[Server.Accept] net listen accept error, err=[%+v]", err)
 			return err
 		}
+		logc.Info("[Server.Accept] conn=[%+v]", conn)
 		go server.ServeConnIncludeOption(conn)
-
 	}
 }
 
@@ -59,17 +63,18 @@ func (server *Server) ServeConnIncludeOption(conn io.ReadWriteCloser) {
 	if err := json.NewDecoder(conn).Decode(&opt); err != nil {
 		logc.Error("[Server.ServeConnIncludeOption] Json decode conn error, err=[%+v]", err)
 	}
-	if opt.MagicNumber != utils.MagicNumber {
+	logc.Info("[Server.ServeConnIncludeOption] Received option=[%+v]", opt)
+	if opt.MagicNumber != MagicNumber {
 		logc.Error("[Server.ServeConnIncludeOption] Received request is not a rpc request, "+
 			"request magicNumber=[%+v]", opt.MagicNumber)
 		return
 	}
-	codecFunc := TypeToCodeCMap[opt.EncodeType]
-	if codecFunc == nil {
+	getCodecFunc := TypeToCodeCMap[opt.EncodeType]
+	if getCodecFunc == nil {
 		logc.Error("[Server.ServeConnIncludeOption] Unsupported given type=[%+v]", opt.EncodeType)
 		return
 	}
-	go server.ServeCodeC(codecFunc(conn))
+	server.ServeCodeC(getCodecFunc(conn))
 }
 
 func (server *Server) ServeCodeC(c CodeC) {
@@ -95,8 +100,8 @@ func (server *Server) ServeCodeC(c CodeC) {
 }
 
 func (server *Server) readRequestHeader(c CodeC) (*Header, error) {
-	var header *Header
-	if err := c.ReadHeader(header); err != io.EOF && err != io.ErrUnexpectedEOF {
+	header := &Header{}
+	if err := c.ReadHeader(header); err != nil {
 		logc.Error("[Server.readRequestHeader] Read header error, err=[%+v]", err)
 		return nil, err
 	}
@@ -109,9 +114,12 @@ func (server *Server) readRequest(c CodeC) (*Request, error) {
 	if err != nil {
 		return nil, err
 	}
+	logc.Info("[Server.readRequest] readRequestHeader success, header=[%+v]", header)
 	req := &Request{header: header}
+
 	req.argv = reflect.New(reflect.TypeOf(""))
-	if err := c.ReadBody(req.argv); err != nil {
+	if err = c.ReadBody(req.argv.Interface()); err != nil {
+		log.Println(err)
 		logc.Error("[Server.readRequest] CodeC decode body is error,err=[%+v]", err)
 		return req, err
 	}

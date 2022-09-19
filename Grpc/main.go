@@ -30,8 +30,11 @@ func startClient(attr chan string) {
 		_ = conn.Close()
 	}()
 
+	// Encode底层是调用的io.write方法，缓冲区的内容发送出去
 	_ = json.NewEncoder(conn).Encode(codec.DefaultGobOption)
 	c := codec.NewGobCodeC(conn)
+
+	time.Sleep(10 * time.Second)
 
 	for i := 0; i < 2; i++ {
 		h := &codec.Header{
@@ -45,9 +48,9 @@ func startClient(attr chan string) {
 		}
 		time.Sleep(1 * time.Second)
 		rspHeader := &codec.Header{}
-		var rspBody interface{}
+		var rspBody string
 		_ = c.ReadHeader(rspHeader)
-		_ = c.ReadBody(rspBody)
+		_ = c.ReadBody(&rspBody)
 		logc.Info("header=[%+v], reply=[%+v]", rspHeader, rspBody)
 	}
 }

@@ -64,6 +64,7 @@ func (server *Server) ServeConnIncludeOption(conn io.ReadWriteCloser) {
 		logc.Error("[Server.ServeConnIncludeOption] Json decode conn error, err=[%+v]", err)
 	}
 	logc.Info("[Server.ServeConnIncludeOption] Received option=[%+v]", opt)
+
 	if opt.MagicNumber != MagicNumber {
 		logc.Error("[Server.ServeConnIncludeOption] Received request is not a rpc request, "+
 			"request magicNumber=[%+v]", opt.MagicNumber)
@@ -138,6 +139,7 @@ func (server *Server) handlerRequest(c CodeC, req *Request, mutex *sync.Mutex, w
 func (server *Server) sendResponse(c CodeC, header *Header, body interface{}, mutex *sync.Mutex) error {
 	mutex.Lock()
 	defer mutex.Unlock()
+	logc.Info("[Server.sendResponse] header=[%+v], body=[%+v]", header, body)
 	if err := c.Write(header, body); err != nil {
 		logc.Error("[Server.sendResponse] write body error, err=[%+v]", err)
 		return err

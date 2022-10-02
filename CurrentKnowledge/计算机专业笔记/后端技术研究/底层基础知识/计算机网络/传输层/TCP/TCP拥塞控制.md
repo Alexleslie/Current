@@ -35,7 +35,7 @@ TCP Reno算法实现了**快速恢复**的机制
 3. 同时该阈值作为新的拥塞窗口值，跳过慢启动阶段，直接进入拥塞控制阶段 
 4. 如果仍然超时，则回到慢启动阶段
 
-![img.png](congestControl.png)
+![img.png](figure/congestControl.png)
 
 
 ### TCP Vegas

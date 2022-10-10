@@ -8,8 +8,7 @@ import (
 	"strings"
 )
 
-// Recovery 使用defer挂载错误恢复函数，调用recover()捕获panic，并将堆栈信息打印在日志中
-// 向用户返回Internal Server Error
+// Recovery 使用defer挂载错误恢复函数，调用recover()捕获panic，并将堆栈信息打印在日志中，向用户返回Internal Server Error
 func Recovery() HandlerFunc {
 	return func(c *Context) {
 		defer func() {

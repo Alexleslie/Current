@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// 路由节点
+// 前缀树路由节点
 type node struct {
 	pattern  string  // 待匹配路由，例如/p/:lang，是从根节点到当前的完整pattern，不是则为空
 	part     string  // 路由的最小组成部分，例如：lang，URL切割后的块值
@@ -13,7 +13,7 @@ type node struct {
 	isWild   bool    // 是否模糊匹配，part含有:或*时候为true
 }
 
-// 从子节点找第一个匹配成功的节点
+// matchChild 定义了从子节点找第一个匹配成功的节点的方法，用于插入（注册）
 func (n *node) matchChild(part string) *node {
 	for _, child := range n.children {
 		if child.part == part || child.isWild {
@@ -23,7 +23,7 @@ func (n *node) matchChild(part string) *node {
 	return nil
 }
 
-// 从子节点找所有匹配成功的节点
+// matchChildren 定义了从子节点找所有匹配成功的节点的方法，用于查询（匹配）
 func (n *node) matchChildren(part string) []*node {
 	nodes := make([]*node, 0)
 	for _, child := range n.children {
@@ -34,6 +34,7 @@ func (n *node) matchChildren(part string) []*node {
 	return nodes
 }
 
+// linkNode 定义了注册节点的方法
 // 从parts的height位置寻找/构造节点且连接节点
 // 直到完成parts中每个part都有对应的节点
 func (n *node) linkNode(pattern string, parts []string, height int) {
@@ -51,6 +52,7 @@ func (n *node) linkNode(pattern string, parts []string, height int) {
 	child.linkNode(pattern, parts, height+1)
 }
 
+// searchNode 定义了查询路由的最终节点
 // 搜索路径的最终路由节点
 func (n *node) searchNode(parts []string, height int) *node {
 	//递归终止条件：找到末尾了或者通配符
@@ -74,6 +76,7 @@ func (n *node) searchNode(parts []string, height int) *node {
 	return nil
 }
 
+// String 定义了节点信息的打印
 func (n *node) String() string {
 	return fmt.Sprintf("node{pattern=%s, part=%s, isWild=%t}", n.pattern, n.part, n.isWild)
 }

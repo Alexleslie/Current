@@ -7,7 +7,7 @@ import (
 
 // router 封装了路由的信息，使用前缀树（基数树）实现动态路由，具备参数匹配和动态匹配两种功能。
 type router struct {
-	roots    map[string]*node       // roots['GET'],roots['POST']
+	roots    map[string]*node       // roots['GET'],roots['POST'],路由根节点
 	handlers map[string]HandlerFunc // handlers['GET-/p/:lang/doc'],handlers['POST-/p/book']
 }
 

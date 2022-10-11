@@ -51,6 +51,7 @@ func (ctx *Context) Next() {
 	}
 }
 
+// ReturnFail 构造了请求错误的响应
 func (ctx *Context) ReturnFail(code int, err string) {
 	ctx.index = len(ctx.handlers)
 	ctx.WriteJSON(code, H{"message": err})
@@ -67,7 +68,7 @@ func (ctx *Context) GetPostForm(key string) string {
 	return ctx.Req.FormValue(key)
 }
 
-// Query 定义了Context.Request.URL查询方法
+// Query 封装了Context.Request.URL.Query().Get(key)，查询参数
 func (ctx *Context) Query(key string) string {
 	return ctx.Req.URL.Query().Get(key)
 }

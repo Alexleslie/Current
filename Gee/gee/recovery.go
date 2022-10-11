@@ -23,7 +23,7 @@ func Recovery() HandlerFunc {
 	}
 }
 
-// 打印debug的堆栈
+// trace 打印debug的堆栈
 func trace(message string) string {
 	var pcs [32]uintptr
 	// Callers 用来返回调用栈的程序计数器,

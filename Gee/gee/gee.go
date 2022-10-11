@@ -18,7 +18,7 @@ type RouterGroup struct {
 	engine      *Engine       // 所有分组共享一个Engine实例
 }
 
-// Engine 是对整个框架的所有资源进行封装，并统一协调
+// Engine 对整个框架的所有资源进行封装，并统一协调
 type Engine struct {
 	*RouterGroup
 	router        *router            // 全局路由

@@ -9,6 +9,7 @@ import (
 查找-删除-新增-修改
 */
 
+// Cache 是一个LRU缓存，并发访问不安全
 // Cache is LRU cache.It is not safe for concurrent access.
 type Cache struct {
 	maxBytes       int64                    // 允许使用的最大内存

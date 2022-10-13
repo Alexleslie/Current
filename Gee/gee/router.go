@@ -5,11 +5,13 @@ import (
 	"strings"
 )
 
+// router 封装了路由的信息，使用前缀树（基数树）实现动态路由，具备参数匹配和动态匹配两种功能。
 type router struct {
-	roots    map[string]*node       // roots['GET'],roots['POST']
+	roots    map[string]*node       // roots['GET'],roots['POST'],路由根节点
 	handlers map[string]HandlerFunc // handlers['GET-/p/:lang/doc'],handlers['POST-/p/book']
 }
 
+// newRouter 定义了新建路由的方法
 func newRouter() *router {
 	return &router{
 		roots:    make(map[string]*node),
@@ -17,6 +19,7 @@ func newRouter() *router {
 	}
 }
 
+// parsePattern 定义了解析路由的方法
 // 将URL以/拆分为各个部分，只允许一个通配符*存在
 func parsePattern(pattern string) []string {
 	vs := strings.Split(pattern, "/")
@@ -33,8 +36,8 @@ func parsePattern(pattern string) []string {
 	return parts
 }
 
-// 从根节点开始链接所有子路由节点
-// 对该路由设置handler函数
+// addRouter 定义了添加路由的方法
+// 从根节点开始链接所有子路由节点,对该路由设置handler函数
 func (r *router) addRouter(method string, absolutePattern string, handler HandlerFunc) {
 	parts := parsePattern(absolutePattern)
 
@@ -48,8 +51,8 @@ func (r *router) addRouter(method string, absolutePattern string, handler Handle
 	r.handlers[key] = handler
 }
 
-// path 为不包含通配符的具体请求路径
-// pattern 为可能包含通配符的路径
+// getRouter 定义了获取路由节点的方法
+// path 为不包含通配符的具体请求路径，pattern 为可能包含通配符的路径
 func (r *router) getRouter(method string, path string) (*node, map[string]string) {
 	searchParts := parsePattern(path)
 	params := make(map[string]string)
@@ -64,8 +67,8 @@ func (r *router) getRouter(method string, path string) (*node, map[string]string
 	return nil, nil
 }
 
-// 处理当路径模式存在通配符的情况
-// 根据路径模式来匹配出请求路径对应的参数
+// matchParams 定义了路径中有通配符的获取路由节点的方法
+// 处理当路径模式存在通配符的情况 ，根据路径模式来匹配出请求路径对应的参数
 func matchParams(pattern string, path string) map[string]string {
 	params := map[string]string{}
 	pathParts := parsePattern(path)
@@ -85,7 +88,7 @@ func matchParams(pattern string, path string) map[string]string {
 	return params
 }
 
-// 将请求路径对应的handlerFunc添加到执行handlers列表里
+// addHandleByPath 将请求路径对应的handlerFunc添加到执行handlers列表里
 func (r *router) addHandleByPath(c *Context) {
 	pathNode, param := r.getRouter(c.Method, c.Path)
 	if pathNode != nil {

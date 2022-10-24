@@ -18,7 +18,7 @@ import pb "Current/Cdn/geecache/geecachepb"
 				|-------------------------------------------->回退到本地节点处理
 */
 
-// PeerPicker 客户端选择，根据一致哈希算法选择节点（http客户端）
+// PeerPicker 客户端选择，根据一致哈希算法选择节点
 type PeerPicker interface {
 	PickPeer(key string) (peer PeerGetter, ok bool) //根据传入的key选择相应节点PeerGetter
 }

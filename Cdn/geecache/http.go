@@ -16,7 +16,7 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
-// HTTPClient 创建一个结构体HTTPClient作为承载节点间HTTP通信的核心数据结构（包括服务端和客户端）
+// HTTPClient 创建一个结构体HTTPClient作为承载节点间HTTP通信的核心数据结构（包括服务端和客户端），相当于一个适配器
 type HTTPClient struct {
 	//this peer's base URL,e.g. "http://example.net:8000"
 	self        string                 // 记录自己地址，包括主机名/IP和端口
@@ -26,11 +26,14 @@ type HTTPClient struct {
 	httpGetters map[string]*httpGetter // keyed by e.g. "http://10.0.0.2:8008"，映射远程节点与对应的httpGetter，每一个远程节点对应一个httpGetter(因为httpGetter与远程节点的地址baseURL有关)
 }
 
+// 访问缓存： /<basepath>/<groupname>/<key>
+
 // http客户端，对应远程节点
 type httpGetter struct {
 	baseURL string //将要访问的远程节点地址
 }
 
+// NewHTTPPool 初始化一个HTTP对等节点池
 // NewHTTPPool initializes an HTTP pool of peers.
 func NewHTTPPool(self string, basePath string) *HTTPClient {
 	return &HTTPClient{
@@ -39,6 +42,7 @@ func NewHTTPPool(self string, basePath string) *HTTPClient {
 	}
 }
 
+// Log 打印带有服务器名称的日志信息
 // Log info with server name
 func (p *HTTPClient) Log(format string, v ...interface{}) {
 	log.Printf("[Server %s] %s", p.self, fmt.Sprintf(format, v...))
@@ -121,6 +125,7 @@ func StartCacheServer(peerAttrs []string, basePath string) {
 	}
 }
 
+// parseCachePath 解析http请求地址
 func parseCachePath(path string) []string {
 	if path[0] == '/' {
 		path = path[1:]

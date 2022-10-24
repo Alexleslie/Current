@@ -26,12 +26,13 @@ type entry struct {
 	value Value
 }
 
+// Value 用于返回值所占的内存大小
 // Value use Len to count how many bytes it takes
-// 用于返回值所占的内存大小
 type Value interface {
 	Len() int
 }
 
+// New 新建一个Cache
 // New is the Constructor of Cache
 func New(maxBytes int64, onEvicted func(string, Value)) *Cache {
 	return &Cache{

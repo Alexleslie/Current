@@ -17,8 +17,7 @@ import (
 							|----->调用“回调函数”，获取值并添加到缓存 --> 返回缓存值
 */
 
-// Getter 从一个key中获取数据
-// 作为缓存未命中时候的回调函数
+// Getter 从数据库中获取数据作为缓存未命中时候的回调函数
 type Getter interface {
 	Get(key string) ([]byte, error)
 }
@@ -31,7 +30,7 @@ func (f GetterFunc) Get(key string) ([]byte, error) {
 	return f(key)
 }
 
-// Group 是缓存的一个命名空间
+// Group 是缓存的一个命名空间，加载相关的数据
 // A Group is a cache namespace and associated data loaded spread over
 type Group struct {
 	name      string              // 每个Group拥有唯一的名称name
@@ -46,6 +45,7 @@ var (
 	groups = make(map[string]*Group) // 全局变量
 )
 
+// NewGroup 创建一个新的Group实例
 // NewGroup create a new instance of Group
 func NewGroup(name string, cacheBytes int64, getter Getter) *Group {
 	if getter == nil {
@@ -79,6 +79,7 @@ func GetGroup(name string) *Group {
 	return g
 }
 
+// Get 用key获取缓存值
 // Get value for a key from cache
 func (g *Group) Get(key string) (ByteView, error) {
 	if key == "" {
@@ -93,6 +94,7 @@ func (g *Group) Get(key string) (ByteView, error) {
 	return g.loadFromAllPeers(key)
 }
 
+// GetKeyAtCacheServer
 func (g *Group) GetKeyAtCacheServer(key string) (ByteView, error) {
 	if key == "" {
 		return ByteView{}, fmt.Errorf("key is required")
@@ -107,6 +109,7 @@ func (g *Group) GetKeyAtCacheServer(key string) (ByteView, error) {
 	return g.loadAndStoreLocally(key)
 }
 
+// loadFromAllPeers 从分布式缓存服务器中寻找缓存
 func (g *Group) loadFromAllPeers(key string) (value ByteView, err error) {
 	// 无论并发调用放的数量如何，每个key只请求一次（本地或远程）,封装singleflight.Group.Do()
 	// 分布式场景下会调用getFromPeer从其他节点获取缓存
@@ -132,7 +135,7 @@ func (g *Group) loadFromAllPeers(key string) (value ByteView, err error) {
 	return view.(ByteView), nil
 }
 
-// 使用实现了PeerGetter接口的httpGetter访问其他HTTP客户端（远程节点）获取缓存
+// getFromPeer 使用实现了PeerGetter接口的httpGetter访问其他HTTP客户端（远程节点）获取缓存
 func (g *Group) getFromPeer(peer PeerGetter, key string) (ByteView, error) {
 	req := &pb.Request{
 		Group: g.name,
@@ -146,7 +149,7 @@ func (g *Group) getFromPeer(peer PeerGetter, key string) (ByteView, error) {
 	return ByteView{b: res.Value}, nil
 }
 
-// getLocally调用用户回调函数g.getter.Get()获取源数据，并且将源数据添加到缓存mainCache中（通过populateCache方法）
+// getLocally 调用用户回调函数g.getter.Get()获取源数据，并且将源数据添加到缓存mainCache中（通过populateCache方法）
 func (g *Group) loadAndStoreLocally(key string) (ByteView, error) {
 	bytes, err := g.getter.Get(key)
 	if err != nil {
@@ -157,6 +160,7 @@ func (g *Group) loadAndStoreLocally(key string) (ByteView, error) {
 	return value, nil
 }
 
+// populateCache 将源数据添加到主缓存
 func (g *Group) populateCache(key string, value ByteView) {
 	g.mainCache.add(key, value)
 }
